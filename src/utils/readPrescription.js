@@ -1,6 +1,6 @@
 // src/utils/readPrescription.js
 //
-// Prescription OCR using Google Gemini Vision (gemini-1.5-flash).
+// Prescription OCR using Google Gemini Vision with fallback models.
 //
 // Usage:
 //   import { readPrescription } from "../utils/readPrescription";
@@ -10,6 +10,8 @@
 // Requires VITE_GEMINI_API_KEY in your .env.local file.
 
 const getApiKey = () => import.meta.env.VITE_GEMINI_API_KEY;
+
+const MODELS = ["gemini-1.5-flash", "gemini-1.5-flash-latest", "gemini-1.5-pro"];
 
 // ── Key guard — fail loud in development, fail silently in prod ───────────
 if (!getApiKey()) {
@@ -59,6 +61,7 @@ function fileToBase64(file) {
  * readPrescription
  *
  * Sends a prescription image to Gemini Vision and returns structured data.
+ * Tries fallback models if the primary model is busy (503/429).
  *
  * @param {File|Blob} file  - The prescription image file
  * @returns {Promise<{ rawText: string, medicines: Array<{name:string, dosage:string, instructions:string}>, error?: string }>}
@@ -79,10 +82,7 @@ export async function readPrescription(file) {
     return { rawText: "", medicines: [], error: "No file provided." };
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
-
   try {
-    console.log("[readPrescription] Preparing image upload for Gemini (gemini-1.5-flash)...");
     const base64Data = await fileToBase64(file);
     const mimeType = file.type || "image/jpeg";
 
@@ -106,72 +106,80 @@ export async function readPrescription(file) {
       },
     };
 
-    console.log("[readPrescription] Calling Gemini API endpoint...");
-    let response;
-    let retries = 2;
-    let delay = 1000;
+    let lastError = null;
 
-    while (retries >= 0) {
-      response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(requestBody),
-      });
+    for (const model of MODELS) {
+      console.log(`[readPrescription] Attempting OCR with model: ${model}...`);
+      const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-      if (response.status === 503 || response.status === 429) {
-        if (retries > 0) {
-          console.warn(`[readPrescription] Gemini API returned ${response.status} (busy/rate limit). Retrying in ${delay}ms... (${retries} retries left)`);
-          await new Promise((r) => setTimeout(r, delay));
-          delay *= 1.5;
-          retries--;
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(requestBody),
+        });
+
+        if (response.status === 503 || response.status === 429) {
+          console.warn(`[readPrescription] Model ${model} returned ${response.status} (overloaded/rate limited). Falling back to next model...`);
+          lastError = `Gemini model ${model} is currently overloaded (${response.status}).`;
           continue;
         }
+
+        if (!response.ok) {
+          const errBody = await response.text();
+          console.error(`[readPrescription] Gemini API HTTP Error on model ${model}:`, {
+            status: response.status,
+            statusText: response.statusText,
+            responseBody: errBody,
+          });
+          lastError = `Gemini API returned status ${response.status}: ${errBody.substring(0, 120)}`;
+          if (response.status >= 500) {
+            continue;
+          }
+          return {
+            rawText: "",
+            medicines: [],
+            error: lastError,
+          };
+        }
+
+        const data = await response.json();
+        console.log(`[readPrescription] Gemini API Response received successfully from ${model}:`, data);
+
+        const rawContent = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+        // Strip markdown code fences if Gemini wraps the JSON
+        const jsonText = rawContent.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
+
+        try {
+          const parsed = JSON.parse(jsonText);
+          return {
+            rawText: parsed.rawText || "",
+            medicines: Array.isArray(parsed.medicines) ? parsed.medicines : [],
+            error: parsed.error || null,
+          };
+        } catch {
+          console.warn("[readPrescription] Could not parse Gemini JSON response as JSON. Raw text:", rawContent);
+          return {
+            rawText: rawContent,
+            medicines: [],
+            error: "Could not parse structured data from the image. Raw text returned.",
+          };
+        }
+      } catch (networkErr) {
+        console.warn(`[readPrescription] Network or fetch error with ${model}:`, networkErr);
+        lastError = networkErr?.message || "Network error";
+        continue;
       }
-      break;
     }
 
-    if (!response.ok) {
-      const errBody = await response.text();
-      console.error("[readPrescription] Gemini API HTTP Error:", {
-        status: response.status,
-        statusText: response.statusText,
-        responseBody: errBody,
-      });
-      return {
-        rawText: "",
-        medicines: [],
-        error: response.status === 503 
-          ? "Gemini model is currently experiencing high demand. Please try again in a few seconds."
-          : `Gemini API returned status ${response.status}: ${errBody.substring(0, 120)}`,
-      };
-    }
-
-    const data = await response.json();
-    console.log("[readPrescription] Gemini API Response received successfully:", data);
-
-    const rawContent = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-
-    // Strip markdown code fences if Gemini wraps the JSON
-    const jsonText = rawContent.replace(/^```(?:json)?\s*/i, "").replace(/```\s*$/i, "").trim();
-
-    try {
-      const parsed = JSON.parse(jsonText);
-      return {
-        rawText: parsed.rawText || "",
-        medicines: Array.isArray(parsed.medicines) ? parsed.medicines : [],
-        error: parsed.error || null,
-      };
-    } catch {
-      // Gemini responded but not valid JSON — return raw text
-      console.warn("[readPrescription] Could not parse Gemini JSON response as JSON. Raw text:", rawContent);
-      return {
-        rawText: rawContent,
-        medicines: [],
-        error: "Could not parse structured data from the image. Raw text returned.",
-      };
-    }
+    return {
+      rawText: "",
+      medicines: [],
+      error: lastError || "All Gemini models were unavailable or overloaded. Please try again in a few moments.",
+    };
   } catch (err) {
-    console.error("[readPrescription] Unexpected network or execution error:", err);
+    console.error("[readPrescription] Unexpected execution error:", err);
     return {
       rawText: "",
       medicines: [],
