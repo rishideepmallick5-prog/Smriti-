@@ -1,0 +1,162 @@
+﻿/* MemoryGame.css — same design system as PatientHome */
+@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap");
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+/* ── Root ─────────────────────────────────────────────────────────── */
+.mg-root{
+  min-height:100dvh;
+  background:#1F3D33;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 90% 10%,rgba(232,163,61,.10) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 50% at 10% 90%,rgba(46,92,74,.60) 0%,transparent 70%);
+  font-family:"Nunito",system-ui,sans-serif;
+  color:#FBF7EE;
+  display:flex;
+  flex-direction:column;
+  padding:28px 20px 40px;
+  gap:24px;
+}
+
+/* ── Top bar ──────────────────────────────────────────────────────── */
+.mg-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.mg-back-btn{
+  display:flex;align-items:center;gap:8px;
+  background:rgba(251,247,238,.12);border:none;border-radius:999px;
+  color:#FBF7EE;font-family:"Nunito",sans-serif;font-size:15px;font-weight:700;
+  padding:10px 18px;cursor:pointer;transition:background .16s ease;
+}
+.mg-back-btn:hover{background:rgba(251,247,238,.22)}
+.mg-title{font-size:clamp(22px,6vw,30px);font-weight:900;color:#FBF7EE;letter-spacing:-.3px}
+.mg-title span{color:#E8A33D}
+
+.mg-diff-badge{
+  font-size:12px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;
+  background:rgba(251,247,238,.12);color:rgba(251,247,238,.75);
+  padding:4px 10px;border-radius:999px;border:1px solid rgba(251,247,238,.15);
+  white-space:nowrap;
+}
+
+/* ── Progress bar ─────────────────────────────────────────────────── */
+.mg-progress-wrap{display:flex;flex-direction:column;gap:8px}
+.mg-progress-header{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mg-progress-label{font-size:13px;font-weight:700;color:rgba(251,247,238,.55);letter-spacing:.08em;text-transform:uppercase}
+.mg-progress-bar-bg{height:8px;border-radius:999px;background:rgba(251,247,238,.12);overflow:hidden}
+.mg-progress-bar-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,#E8A33D,#D4892A);transition:width .4s ease}
+
+/* ── Question card ────────────────────────────────────────────────── */
+@keyframes mg-slideIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.mg-question-card{
+  background:#FBF7EE;border-radius:24px;
+  box-shadow:0 6px 28px rgba(0,0,0,.22);
+  overflow:hidden;
+  animation:mg-slideIn .32s ease both;
+}
+.mg-photo{
+  width:100%;height:200px;object-fit:cover;display:block;
+  background:linear-gradient(135deg,#2E5C4A,#1F3D33);
+}
+.mg-photo-placeholder{
+  width:100%;height:200px;display:flex;align-items:center;justify-content:center;
+  background:linear-gradient(135deg,#2E5C4A,#1F3D33);font-size:64px;
+}
+.mg-question-body{padding:22px 20px 20px}
+.mg-question-prompt{font-size:13px;font-weight:700;color:#6B7B6E;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
+.mg-question-title{font-size:clamp(20px,5.5vw,26px);font-weight:900;color:#1C2B24;line-height:1.25;margin-bottom:4px}
+.mg-question-sub{font-size:14px;font-weight:600;color:#6B7B6E;margin-bottom:18px}
+
+/* ── Options ──────────────────────────────────────────────────────── */
+.mg-options{display:flex;flex-direction:column;gap:12px}
+.mg-option-btn{
+  width:100%;min-height:64px;border-radius:16px;border:2.5px solid #D8CFB8;
+  background:#FBF7EE;color:#1C2B24;
+  font-family:"Nunito",sans-serif;font-size:clamp(15px,4vw,18px);font-weight:700;
+  text-align:left;padding:14px 18px;cursor:pointer;
+  transition:border-color .15s ease,background .15s ease,transform .12s ease,box-shadow .15s ease;
+  line-height:1.3;
+}
+.mg-option-btn:hover:not(:disabled){
+  border-color:#E8A33D;background:#FFF8EC;transform:translateX(4px);
+  box-shadow:0 4px 14px rgba(232,163,61,.20);
+}
+.mg-option-btn:disabled{cursor:default}
+.mg-option-btn.correct{
+  border-color:#2E8B57;background:#EAF7EE;color:#1C5E36;
+  box-shadow:0 4px 16px rgba(46,139,87,.25);
+}
+.mg-option-btn.incorrect{border-color:#D95C3A;background:#FDF0EC;color:#8B2A12}
+.mg-option-btn.reveal-correct{border-color:#2E8B57;background:#EAF7EE;color:#1C5E36}
+
+/* ── Feedback banner ──────────────────────────────────────────────── */
+@keyframes mg-pop{0%{transform:scale(.85);opacity:0}60%{transform:scale(1.05)}100%{transform:scale(1);opacity:1}}
+.mg-feedback{
+  border-radius:16px;padding:16px 20px;
+  font-size:clamp(16px,4.5vw,20px);font-weight:800;
+  display:flex;align-items:center;gap:12px;
+  animation:mg-pop .25s ease both;
+}
+.mg-feedback.correct{background:rgba(46,139,87,.18);color:#C8FFD4;border:1.5px solid rgba(46,139,87,.35)}
+.mg-feedback.incorrect{background:rgba(217,92,58,.18);color:#FFD4C8;border:1.5px solid rgba(217,92,58,.35)}
+.mg-feedback-icon{font-size:24px}
+
+/* ── Next button ──────────────────────────────────────────────────── */
+.mg-next-btn{
+  width:100%;min-height:68px;border:none;border-radius:20px;
+  background:linear-gradient(135deg,#E8A33D 0%,#D4892A 100%);
+  color:#1C2B24;font-family:"Nunito",sans-serif;
+  font-size:clamp(18px,5vw,22px);font-weight:900;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;
+  box-shadow:0 6px 24px rgba(232,163,61,.40);
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.mg-next-btn:hover{transform:translateY(-3px) scale(1.01);box-shadow:0 12px 32px rgba(232,163,61,.45)}
+.mg-next-btn:active{transform:scale(.98)}
+
+/* ── State cards (loading / empty / error) ────────────────────────── */
+@keyframes mg-spin{to{transform:rotate(360deg)}}
+.mg-spinner{
+  width:36px;height:36px;border-radius:50%;margin:0 auto 14px;
+  border:4px solid rgba(251,247,238,.15);border-top-color:#E8A33D;
+  animation:mg-spin .8s linear infinite;
+}
+.mg-state-card{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;gap:12px;padding:40px 24px;
+  background:rgba(251,247,238,.07);border-radius:24px;
+}
+.mg-state-icon{font-size:56px;line-height:1}
+.mg-state-title{font-size:clamp(20px,5vw,26px);font-weight:900;color:#FBF7EE}
+.mg-state-body{font-size:clamp(15px,4vw,18px);font-weight:600;color:rgba(251,247,238,.60);line-height:1.5;max-width:280px}
+.mg-state-card.error .mg-state-title{color:#F4836E}
+
+/* ── Completion screen ────────────────────────────────────────────── */
+@keyframes mg-starPop{0%{transform:scale(0) rotate(-20deg);opacity:0}70%{transform:scale(1.15) rotate(5deg)}100%{transform:scale(1) rotate(0deg);opacity:1}}
+.mg-complete{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:20px;text-align:center;padding:20px;
+}
+.mg-complete-star{font-size:80px;animation:mg-starPop .5s ease both}
+.mg-complete-title{font-size:clamp(28px,8vw,42px);font-weight:900;color:#E8A33D;line-height:1.1}
+.mg-score-card{
+  background:#FBF7EE;border-radius:24px;padding:24px 40px;
+  box-shadow:0 6px 28px rgba(0,0,0,.20);
+}
+.mg-score-number{font-size:clamp(52px,16vw,80px);font-weight:900;color:#1C2B24;line-height:1}
+.mg-score-denom{font-size:18px;font-weight:700;color:#6B7B6E;margin-top:4px}
+.mg-score-label{font-size:clamp(14px,3.5vw,16px);font-weight:700;color:#6B7B6E;margin-top:8px;text-transform:uppercase;letter-spacing:.06em}
+.mg-complete-actions{display:flex;flex-direction:column;gap:12px;width:100%;max-width:340px}
+.mg-play-again-btn{
+  width:100%;min-height:68px;border:none;border-radius:20px;
+  background:linear-gradient(135deg,#E8A33D,#D4892A);
+  color:#1C2B24;font-family:"Nunito",sans-serif;
+  font-size:clamp(18px,5vw,22px);font-weight:900;cursor:pointer;
+  box-shadow:0 6px 24px rgba(232,163,61,.40);
+  transition:transform .16s ease;
+}
+.mg-play-again-btn:hover{transform:translateY(-3px)}
+.mg-home-btn{
+  width:100%;min-height:60px;border:2.5px solid rgba(251,247,238,.35);border-radius:20px;
+  background:transparent;color:#FBF7EE;
+  font-family:"Nunito",sans-serif;font-size:clamp(16px,4.5vw,20px);font-weight:800;
+  cursor:pointer;transition:background .16s ease,border-color .16s ease;
+}
+.mg-home-btn:hover{background:rgba(251,247,238,.10);border-color:rgba(251,247,238,.55)}

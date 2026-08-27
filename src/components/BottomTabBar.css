@@ -1,0 +1,65 @@
+/* BottomTabBar.css — Smriti design system */
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
+
+.btb-root {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border-top: 1px solid #EFEAE1;
+  padding: 10px 16px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.btb-item {
+  flex: 1;
+  max-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  border-radius: 16px;
+  padding: 8px 12px;
+  cursor: pointer;
+  color: #1F3D33;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  outline: none;
+}
+
+.btb-item:hover {
+  background: rgba(31, 61, 51, 0.05);
+}
+
+.btb-item.active {
+  background: #E8A33D;
+  color: #1F3D33;
+  font-weight: 800;
+  border-radius: 18px;
+  box-shadow: 0 4px 14px rgba(232, 163, 61, 0.4);
+}
+
+.btb-icon {
+  transition: transform 0.2s ease;
+}
+
+.btb-item.active .btb-icon {
+  transform: scale(1.1);
+}
+
+.btb-label {
+  line-height: 1.1;
+}

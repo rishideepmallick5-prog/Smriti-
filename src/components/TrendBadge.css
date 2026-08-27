@@ -1,0 +1,42 @@
+/* src/components/TrendBadge.css */
+
+.trend-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 2px 0;
+  padding: 7px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+}
+
+.trend-badge--improving {
+  background: #E8F5EE;
+  color: #1B6B3A;
+  border: 1px solid #B7DFC9;
+}
+
+.trend-badge--declining {
+  background: #FDF0EF;
+  color: #943520;
+  border: 1px solid #F5C7C0;
+}
+
+.trend-badge--stable {
+  background: #F3F4F6;
+  color: #4B5563;
+  border: 1px solid #D1D5DB;
+}
+
+.trend-badge--insufficient {
+  background: transparent;
+  color: #7A8C84;
+  border: none;
+  padding: 6px 0 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  font-style: italic;
+}
