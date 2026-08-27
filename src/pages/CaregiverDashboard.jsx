@@ -753,24 +753,31 @@ export default function CaregiverDashboard({ lang = "en", onGoHome, session, onS
     setScanError(null);
     setScannedMedicines([]);
 
-    const result = await readPrescription(file);
+    try {
+      const result = await readPrescription(file);
 
-    setScanning(false);
+      if (result.error && (!result.medicines || result.medicines.length === 0)) {
+        setScanError(result.error);
+        showToast("✗ " + result.error, "error");
+        alert("Failed to scan prescription. Please try again.");
+        return;
+      }
 
-    if (result.error && result.medicines.length === 0) {
-      setScanError(result.error);
-      showToast("✗ " + result.error, "error");
-      return;
+      if (!result.medicines || result.medicines.length === 0) {
+        setScanError("No medicines detected. Try a clearer image.");
+        showToast("No medicines detected. Try a clearer image.", "error");
+        return;
+      }
+
+      setScannedMedicines(result.medicines);
+      showToast(`✓ Found ${result.medicines.length} medicine(s) — review below.`, "success");
+    } catch (err) {
+      console.error("[handleAIScan] Error:", err);
+      setScanError("Failed to scan prescription. Please try again.");
+      alert("Failed to scan prescription. Please try again.");
+    } finally {
+      setScanning(false);
     }
-
-    if (result.medicines.length === 0) {
-      setScanError("No medicines detected. Try a clearer image.");
-      showToast("No medicines detected. Try a clearer image.", "error");
-      return;
-    }
-
-    setScannedMedicines(result.medicines);
-    showToast(`✓ Found ${result.medicines.length} medicine(s) — review below.`, "success");
   }
 
   // Add all scanned medicines to the patient record in one batch

@@ -1,6 +1,6 @@
 // src/utils/readPrescription.js
 //
-// Prescription OCR using Google Gemini Vision (gemini-3.7-flash).
+// Prescription OCR using Google Gemini Vision (gemini-1.5-flash).
 //
 // Usage:
 //   import { readPrescription } from "../utils/readPrescription";
@@ -79,10 +79,10 @@ export async function readPrescription(file) {
     return { rawText: "", medicines: [], error: "No file provided." };
   }
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.7-flash:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
   try {
-    console.log("[readPrescription] Preparing image upload for Gemini (gemini-3.7-flash)...");
+    console.log("[readPrescription] Preparing image upload for Gemini (gemini-1.5-flash)...");
     const base64Data = await fileToBase64(file);
     const mimeType = file.type || "image/jpeg";
 

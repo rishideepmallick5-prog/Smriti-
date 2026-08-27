@@ -29,7 +29,7 @@ Smriti turns a patient's own life story into their therapy. A caregiver logs the
 | Frontend | React (Vite) |
 | Backend / DB | Supabase (Postgres, Auth, Storage) |
 | Analytics | Recharts |
-| AI (Prescription OCR) | Google Gemini API (`gemini-2.5-flash`) |
+| AI (Prescription OCR) | Google Gemini API (`gemini-1.5-flash`) |
 | Voice | Web Speech API |
 | Offline Sync | IndexedDB |
 
